@@ -693,15 +693,15 @@ class INS_GPS_NAV : public NAV {
 
       {
         Matrix<float_sylph_t> P(ins_gps->getFilter().getP());
-        static const unsigned NP(Filtered_INS_ClockErrorEstimated<BaseFINS>::P_SIZE);
-        P(NP - 1, NP - 1) *= 1; // TODO
+        static const unsigned NP(Filtered_INS_ClockErrorEstimated<BaseFINS>::P_SIZE_WITHOUT_CLOCK_ERROR);
+        P(NP, NP) *= 1; // TODO
         ins_gps->getFilter().setP(P);
       }
 
       {
         Matrix<float_sylph_t> Q(ins_gps->getFilter().getQ());
-        static const unsigned NQ(Filtered_INS_ClockErrorEstimated<BaseFINS>::Q_SIZE);
-        Q(NQ - 1, NQ - 1) *= 1; // TODO
+        static const unsigned NQ(Filtered_INS_ClockErrorEstimated<BaseFINS>::Q_SIZE_WITHOUT_CLOCK_ERROR);
+        Q(NQ, NQ) *= 1; // TODO
         ins_gps->getFilter().setQ(Q);
       }
 
@@ -729,6 +729,8 @@ class INS_GPS_NAV : public NAV {
     template <class Calibration>
     void setup_filter(const Calibration &calibration){
       setup_filter2(calibration, ins_gps);
+      //std::cerr << "P:" << ins_gps->getFilter().getP() << std::endl;
+      //std::cerr << "Q:" << ins_gps->getFilter().getQ() << std::endl;
     }
   public:
     template <class Calibration>
@@ -1107,8 +1109,8 @@ typename INS_GPS::float_t fname() const {return INS_GPS::fname();}
         Matrix<float_sylph_t> &P(
             const_cast<Matrix<float_sylph_t> &>(
               const_cast<Filtered_INS_ClockErrorEstimated<BaseFINS> *>(fins)->getFilter().getP()));
-        for(int i(Filtered_INS_ClockErrorEstimated<BaseFINS>::P_SIZE_WITHOUT_CLOCK_ERROR);
-            i < Filtered_INS_ClockErrorEstimated<BaseFINS>::P_SIZE; ++i){
+        for(int i(Filtered_INS_ClockErrorEstimated<BaseFINS>::P_SIZE_WITHOUT_CLOCK_ERROR), j(0);
+            j < Filtered_INS_ClockErrorEstimated<BaseFINS>::P_SIZE_CLOCK_ERROR; ++i, ++j){
           out << ',' << sqrt(P(i, i));
         }
       }
